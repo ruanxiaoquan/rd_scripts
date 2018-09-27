@@ -1,0 +1,20 @@
+import React from 'react';
+import { observer, inject } from 'mobx-react';
+import BasePage from '@components/BasePage';
+import { withRouter } from 'react-router-dom';
+
+import './$component.scss';
+
+@inject()
+@withRouter
+@observer
+export default class $component extends BasePage {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    return <div className="$component_class">$component</div>;
+  }
+}
