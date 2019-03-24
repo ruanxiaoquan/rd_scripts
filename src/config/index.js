@@ -44,16 +44,16 @@ function getPackageJson(options = {}) {
     template = 'mobile',
     version = '1.0.0',
   } = options;
-  let dependencies = {};
-  const devDependencies = {};
+  let dep = {};
   switch (template) {
     case 'mobile':
-      dependencies = depends.moblie;
+      dep = depends.moblie;
       break;
     case 'pc':
-      dependencies = depends.pc;
+      dep = depends.pc;
       break;
     case 'library':
+      dep = depends.library;
       break;
   }
   let packageJsonTemplate = `
@@ -63,16 +63,14 @@ function getPackageJson(options = {}) {
     "description": "${description}",
     "main": "index.js",
     "scripts": {
-      "start": "ww_cli dev",
-      "build": "ww_cli build",
-      "publish": "ww_cli publish",
-      "dev": "node ../../bin/ww dev",
+      "start": "rd-cli dev",
+      "build": "rd-cli build",
       "test": "echo 'Error: no test specified' && exit 1"
     },
     "author": "",
     "license": "ISC",
-    "dependencies": ${JSON.stringify(dependencies, null, 6)},
-    "devDependencies": ${JSON.stringify(devDependencies, null, 6)}
+    "dependencies": ${JSON.stringify(dep.dependencies, null, 6)},
+    "devDependencies": ${JSON.stringify(dep.devDependencies, null, 6)}
   }
 `;
   return packageJsonTemplate;

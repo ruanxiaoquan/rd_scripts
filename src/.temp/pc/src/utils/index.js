@@ -1,18 +1,20 @@
 import axios from 'axios';
-axios.defaults.withCredentials = true;
+
+const instance = axios.create({
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
 /**
  * 网络请求
  * @param {*} api
  * @param {*} params
  */
-function request(options = {}, params) {
+function request(options = {}, params = {}) {
   const { type = 'GET', api } = options;
-  let instance = axios.create({
-    timeout: 5000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
   return new Promise((resolve, reject) => {
     switch (type) {
       case 'POST':
@@ -20,10 +22,14 @@ function request(options = {}, params) {
           .post(api, params || {})
           .then((data) => {
             console.log(`【${api}】的响应`, data.data);
-            resolve(data.data);
+            requestHandle(data, () => resolve(data.data));
           })
           .catch((err) => {
             console.log(`【${api}】发生错误`, err);
+            resolve({
+              status_code: 40000,
+              message: '链接超时',
+            });
           });
         break;
       default:
@@ -31,14 +37,28 @@ function request(options = {}, params) {
           .get(api, params || {})
           .then((data) => {
             console.log(`【${api}】的响应`, data.data);
-            resolve(data.data);
+            requestHandle(data, () => resolve(data.data));
           })
           .catch((err) => {
             console.log(`【${api}】发生错误`, err);
+            resolve({
+              status_code: 40000,
+              message: '链接超时',
+            });
           });
         break;
     }
   });
+}
+
+function requestHandle(res, cb) {
+  const { data, status, code, status_code } = res.data;
+  let redirectUrl = encodeURIComponent(window.location.href);
+  if (status === 401 || code === 16000) {
+    window.location.replace(`/login?redirectUrl=${redirectUrl}`);
+  } else {
+    cb && cb();
+  }
 }
 
 export const net = {

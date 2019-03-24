@@ -12,15 +12,17 @@ const queryString = require('querystring');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
 const webpackCfg = require('../config/webpack.web.dev.config');
+const libWebpackCfg = require('../config/webpack.lib.dev.config');
 const config = require('../config');
 const utils = require('./utils');
 const ww_config = utils.requireModule(config.ww_config_name);
-axios.defaults.withCredentials = true;
 
 class DevServer {
   constructor(options = {}) {
     this.app = null;
     this.compiler = {};
+    const { type } = ww_config || {};
+    this.webpackCfg = type === 'library' ? libWebpackCfg : webpackCfg;
     this.createServer();
   }
 
@@ -40,8 +42,8 @@ class DevServer {
 
   createServer() {
     const { devServer = {} } = ww_config || {};
-    const updateCfg = utils.requireModule('webpack.dev.update.config.js');
-    this.compiler = webpack(webpackCfg);
+    // const updateCfg = utils.requireModule('webpack.dev.update.config.js');
+    this.compiler = webpack(this.webpackCfg);
     this.app = express();
     this.app.engine('.html', require('ejs').__express);
     this.app.set('view engine', 'html');
@@ -53,6 +55,9 @@ class DevServer {
         hot: true,
         stats: {
           colors: true,
+          modules: false,
+          chunks: false,
+          children: false,
         },
       }),
     );
@@ -63,7 +68,7 @@ class DevServer {
     this.app.all('/api/*', (req, res) => {
       const method = req.method.toLocaleUpperCase();
       let params = req.query;
-      const { api = '' } = devServer;
+      const { api = '', timeout = 5000 } = devServer;
       let url = '';
       if (api.indexOf('http') > -1 || api.indexOf('https') > -1) {
         url =
@@ -78,47 +83,33 @@ class DevServer {
       if (req.headers.cookie) {
         reqHeaders['Cookie'] = req.headers.cookie;
       }
-      switch (method) {
-        case 'POST':
-          params = Object.assign({}, params, req.body);
-          axios
-            .post(url, params, {
-              headers: reqHeaders,
-            })
-            .then((result) => {
-              console.log(result.data);
-              return handleReq(result, res);
-            })
-            .catch((err) => {
-              const { status, statusText, headers = {} } = err.response || {};
-              return res.send({ statusText, status, headers });
-            });
-          break;
-        case 'GET':
-          axios
-            .get(url, {
-              headers: reqHeaders,
-              params,
-            })
-            .then((result) => {
-              return handleReq(result, res);
-            })
-            .catch((err) => {
-              const { status, statusText, headers = {} } = err.response || {};
-              return res.send({ statusText, status, headers });
-            });
-          break;
-        default:
-          break;
+
+      const reqOps = {
+        url,
+        method,
+        headers: reqHeaders,
+        params: params || {},
+        timeout: timeout,
+        withCredentials: true,
+      };
+
+      if (method === 'POST') {
+        reqOps.data = Object.assign({}, params, req.body);
       }
 
-      function handleReq(result, res) {
-        const resCookie = result.headers['set-cookie'];
-        if (resCookie) {
-          res.setHeader('set-cookie', resCookie.join(';'));
-        }
-        return res.send(result.data);
-      }
+      axios
+        .request(reqOps)
+        .then((result) => {
+          const resCookie = result.headers['set-cookie'];
+          if (resCookie) {
+            res.setHeader('set-cookie', resCookie.join(';'));
+          }
+          return res.send(result.data);
+        })
+        .catch((err) => {
+          const { status, statusText, headers = {} } = err.response || {};
+          return res.send({ statusText, status, headers });
+        });
     });
 
     this.app.get('*', (req, res) => {

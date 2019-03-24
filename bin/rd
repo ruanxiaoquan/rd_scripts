@@ -3,17 +3,43 @@
 const init = require('../src/scripts/init');
 const DevServer = require('../src/scripts/devServer');
 const compile = require('../src/scripts/build');
+const pub = require('../src/scripts/publish');
 const add = require('../src/scripts/add');
 
 const argv = require('yargs')
   .usage('Usage：$0 <command> [options]')
-  .option('n', {
-    alias: 'name',
-    type: 'string',
-    describe: '项目名称',
+  .option('p', {
+    alias: 'page',
+    type: 'bool',
+    describe: '创建页面：rd-cli add 页面名字 -p',
   })
+  .option('c', {
+    alias: 'component',
+    type: 'bool',
+    describe: '创建组件：rd-cli add 组件名字 -c',
+  })
+  .option('v', {
+    alias: 'version',
+    type: 'bool',
+    describe: '版本号',
+  })
+  // .option('d', {
+  //   alias: 'dev',
+  //   type: 'bool',
+  //   describe: '发布预发环境',
+  // })
+  // .option('r', {
+  //   alias: 'release',
+  //   type: 'bool',
+  //   describe: '发布生产环境',
+  // })
   .alias('h', 'help')
   .epilog('copyright 2018').argv;
+const v = argv.v || argv.version;
+if (v) {
+  console.log(v);
+  return;
+}
 const cmd = argv._[0] || '';
 switch (cmd) {
   case 'init':
@@ -23,12 +49,23 @@ switch (cmd) {
     });
     break;
   case 'add':
-    const componentName = argv._[1] || argv.n;
-    if (!componentName) {
+    let type;
+    if (argv.c) {
+      type = 'components';
+    } else if (argv.p) {
+      type = 'pages';
+    } else {
+      console.log('请选择创建类型');
+    }
+    const name = argv._[1];
+    if (!name) {
       console.log('请输入组件名~');
       return;
     }
-    add.addComponent(componentName);
+    add.addComponent({
+      name,
+      type,
+    });
     break;
   case 'dev':
     new DevServer().run();
@@ -36,8 +73,13 @@ switch (cmd) {
   case 'build':
     compile.build();
     break;
-  case 'publish':
-    break;
+  // case 'publish':
+  //   let p = 'dev';
+  //   if (argv.r) {
+  //     p = 'release';
+  //   }
+  //   pub.publish(p);
+  //   break;
   default:
     console.log('没有此命令');
     process.exit(1);

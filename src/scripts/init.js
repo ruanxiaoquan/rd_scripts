@@ -89,7 +89,15 @@ function createConfigFile(project = {}) {
     projectName,
     component,
     type: template,
-    alias: {},
+    alias: {
+      '@components': './src/components',
+      '@utils': './src/utils',
+    },
+    devServer: {
+      host: '127.0.0.1',
+      port: 8888,
+      api: 'http://127.0.0.1:7001',
+    },
   };
   return `module.exports = ${JSON.stringify(cfg, null, 2)}`;
 }

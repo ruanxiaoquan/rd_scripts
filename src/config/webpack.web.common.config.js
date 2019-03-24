@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const fs = require('fs-extra');
 const os = require('os');
-const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const config = require('./index');
 const utils = require('../scripts/utils');
 const ww_config = utils.requireModule(config.ww_config_name);
@@ -40,7 +40,7 @@ if (utils.requireModule('postcss.config.js')) {
 
 const plugins = [
   new HappyPack({
-    debug: true,
+    debug: false,
     id: 'js',
     loaders: [
       {
@@ -66,25 +66,25 @@ const plugins = [
     threadPool: happyThreadPool,
   }),
   new HappyPack({
-    debug: true,
+    debug: false,
     id: 'css',
     loaders: cssLoaders,
     threadPool: happyThreadPool,
   }),
   new HappyPack({
-    debug: true,
+    debug: false,
     id: 'less',
     loaders: lessLoaders,
     threadPool: happyThreadPool,
   }),
   new HappyPack({
-    debug: true,
+    debug: false,
     id: 'sass',
     loaders: sassLoaders,
     threadPool: happyThreadPool,
   }),
   new HappyPack({
-    debug: true,
+    debug: false,
     id: 'assets',
     loaders: [
       {
@@ -95,7 +95,6 @@ const plugins = [
       },
     ],
   }),
-  new BundleAnalyzerPlugin(),
 ];
 
 module.exports = {
@@ -108,12 +107,14 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       path.resolve(info.absoluteResourcePath).replace(/\\/g, '/'),
   },
-  stats: 'errors-only',
+  stats: 'normal',
   optimization: {
     splitChunks: {
+      name: true,
+      chunks: 'async',
       cacheGroups: {
         default: {
-          minChunks: 2,
+          minChunks: 1,
           priority: -20,
           reuseExistingChunk: true,
         },
@@ -178,13 +179,14 @@ module.exports = {
     ],
   },
   plugins: plugins.concat([
-    new webpack.ProgressPlugin((percentage, msg) => {
-      const stream = process.stderr;
-      if (percentage < 0.71) {
-        stream.cursorTo(0);
-        stream.write(`📦   ${msg}`);
-        stream.clearLine(1);
-      }
-    }),
+    // new webpack.ProgressPlugin((percentage, msg) => {
+    //   const stream = process.stderr;
+    //   if (percentage < 0.71) {
+    //     stream.cursorTo(0);
+    //     stream.write(`📦   ${msg}`);
+    //     stream.clearLine(1);
+    //   }
+    // }),
+    new ProgressBarPlugin(),
   ]),
 };
