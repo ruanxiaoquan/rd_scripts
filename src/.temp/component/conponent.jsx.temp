@@ -1,14 +1,18 @@
-import React , { PureComponent } from 'react';
-
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import './$c.scss';
 
 export default class $c extends PureComponent {
+  static propTypes = {};
+
+  static defaultProps = {};
+
   constructor(props) {
     super(props);
     this.state = {};
   }
 
   render() {
-    return <div className="$style_wrapper">$c</div>;
+    return <div className="$style-wrapper">$c</div>;
   }
 }

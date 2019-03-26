@@ -58,11 +58,10 @@ function create(project = {}) {
   inquirer
     .prompt(asks)
     .then((res) => {
-      console.log(res);
       createProject(res);
     })
     .catch((err) => {
-      lib.log.err(err);
+      console.log(err);
     });
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+const colors = require('colors');
 const init = require('../src/scripts/init');
 const DevServer = require('../src/scripts/devServer');
 const compile = require('../src/scripts/build');
@@ -17,6 +17,11 @@ const argv = require('yargs')
     alias: 'component',
     type: 'bool',
     describe: '创建组件：rd-cli add 组件名字 -c',
+  })
+  .option('i', {
+    alias: 'include',
+    type: 'bool',
+    describe: '创建组件：rd-cli add 组件名字 -c -i',
   })
   .option('v', {
     alias: 'version',
@@ -54,17 +59,16 @@ switch (cmd) {
       type = 'components';
     } else if (argv.p) {
       type = 'pages';
-    } else {
-      console.log('请选择创建类型');
     }
     const name = argv._[1];
     if (!name) {
-      console.log('请输入组件名~');
+      console.log('请输入组件名'.yellow);
       return;
     }
     add.addComponent({
       name,
       type,
+      isPrivate: argv.i,
     });
     break;
   case 'dev':
@@ -81,7 +85,7 @@ switch (cmd) {
   //   pub.publish(p);
   //   break;
   default:
-    console.log('没有此命令');
+    console.log('没有此命令'.red);
     process.exit(1);
     break;
 }
