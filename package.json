@@ -1,6 +1,6 @@
 {
   "name": "rd_scripts",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "服务于react快速开发脚手架",
   "main": "index.js",
   "directories": {
@@ -67,6 +67,8 @@
   "homepage": "https://github.com/ruanxiaoquan/rd_scripts#readme",
   "devDependencies": {
     "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.26.0"
+    "babel-polyfill": "^6.26.0",
+    "copy-webpack-plugin": "^5.0.2",
+    "webpack-manifest-plugin": "^2.0.4"
   }
 }

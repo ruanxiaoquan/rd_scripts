@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs-extra');
 const os = require('os');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const ManifestPlugin = require('webpack-manifest-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const config = require('./index');
 const utils = require('../scripts/utils');
 const ww_config = utils.requireModule(config.ww_config_name);
@@ -179,14 +181,16 @@ module.exports = {
     ],
   },
   plugins: plugins.concat([
-    // new webpack.ProgressPlugin((percentage, msg) => {
-    //   const stream = process.stderr;
-    //   if (percentage < 0.71) {
-    //     stream.cursorTo(0);
-    //     stream.write(`📦   ${msg}`);
-    //     stream.clearLine(1);
-    //   }
-    // }),
-    new ProgressBarPlugin(),
+    new ProgressBarPlugin({
+      format: 'build [:bar] [:msg] [:percent]',
+      clear: false,
+    }),
+    new ManifestPlugin(),
+    // new CopyWebpackPlugin([
+    //   {
+    //     from: path.resolve(config.appDir, 'public'),
+    //     to: path.resolve(config.appDir, 'dist/public'),
+    //   },
+    // ]),
   ]),
 };
